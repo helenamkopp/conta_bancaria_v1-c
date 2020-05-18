@@ -1,5 +1,4 @@
-#continuar..
-
+import abc
 import datetime
 
 
@@ -24,9 +23,9 @@ class Historic:
             print("-", t)
 
 
-class Account:
+class Account(abc.ABC):
 
-    def __init__(self, number, client, balance, limit=1000.0):
+    def __init__(self, number, client, balance=0, limit=1000.0):
         if not isinstance(client, Client):
             raise TypeError(f"client must be of type Client not {type(client)}")
         self._holder = client
@@ -60,8 +59,13 @@ class Account:
             self._historic.transactions.append(f"Transfer of R$ {amount} for account {destiny.deposit}")
             return True
 
+    @abc.abstractmethod
     def update(self, tax):
         self._balance += self._balance * tax
+
+    @property
+    def balance(self):
+        return self._balance
 
 
 class SavingAccount(Account):
@@ -78,8 +82,13 @@ class CheckingAccount(Account):
     def __init__(self, number, client, balance, limit=1000.0):
         super().__init__(number, client, balance, limit)
 
+    def deposit(self, amount):
+        self._balance += amount - 0.10
+
     def update(self, tax):
         self._balance += self._balance * tax * 2
 
-    def deposit(self, amount):
-        self._balance += amount - 0.10
+
+class InvestmentAccount(Account):
+    def update(self, tax):
+        self._balance += self._balance * tax * 5
